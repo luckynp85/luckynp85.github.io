@@ -1,28 +1,22 @@
 # Reliability, Visually
 
-Interactive reliability engineering explainers, hosted on GitHub Pages.
+Interactive, visual explainers of reliability engineering, where every graph is live: drag it, slide it, and build the intuition that formulas leave out.
 
-## Files
+**Visit the site: [luckynp85.github.io](https://luckynp85.github.io)**
 
-- `index.html`: home page listing the articles
-- `mle/index.html`: "The likeliest curve" (MLE and rank regression)
-- `mle/preview.png`: the image shown when the link is shared on LinkedIn
-- `.nojekyll`: tells GitHub to serve the files as-is
+## Articles
 
-## Publish (first time)
+| Article | What you'll learn |
+|---|---|
+| [The likeliest curve](https://luckynp85.github.io/mle/) | What Maximum Likelihood Estimation really does, why suspended units matter, and when MLE beats rank regression on Weibull paper |
+| *Weibull vs lognormal* | Coming soon |
 
-1. (Done: your username is already filled in.)
-2. On GitHub, create a **public** repository named exactly `luckynp85.github.io`.
-3. Click **Add file → Upload files** and drag everything *inside* this folder (not the folder itself) into the page. Click **Commit changes**.
-4. Go to **Settings → Pages**. Under *Build and deployment*, choose **Deploy from a branch**, pick **main** and **/ (root)**, then **Save**.
-5. After a minute or two the site is live at `https://luckynp85.github.io/` and the article at `https://luckynp85.github.io/mle/`.
+![Preview of the Weibull likelihood landscape](mle/preview.png)
 
-## Add a new article
+## About
 
-1. Make a new folder, e.g. `weibull-vs-lognormal/`, containing an `index.html`.
-2. Add a card for it in the home page's `index.html`.
-3. Upload both and commit. The site updates automatically.
+Written by [Laxman Pangeni](https://www.linkedin.com/in/laxman-pangeni/), reliability engineer and author of the [Reliability by Design](https://accendoreliability.com/articles/on-product-reliability/reliability-by-design/) series on Accendo Reliability.
 
-## Custom domain (optional)
+Each article is a single self-contained HTML page with no frameworks and no tracking. All calculations run in your browser.
 
-Buy a domain, then enter it under **Settings → Pages → Custom domain** and follow GitHub's DNS instructions. Tick **Enforce HTTPS** once it's available.
+Found an error or have an idea for the next explainer? [Open an issue](https://github.com/luckynp85/luckynp85.github.io/issues).
