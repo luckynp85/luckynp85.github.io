@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reliability, Visually</title>
+<meta name="description" content="Interactive, visual explainers of reliability engineering: Weibull, MLE, MTBF, FMEA and more.">
+<meta property="og:title" content="Reliability, Visually">
+<meta property="og:description" content="Interactive, visual explainers of reliability engineering.">
+<meta property="og:image" content="https://luckynp85.github.io/mle/preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Literata:opsz,wght@7..72,400;7..72,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0f141b;--panel:#151c26;--ink:#e8ebf0;--soft:#c3cad5;--muted:#8e9aab;--line:#253245;--blue:#5fb0f5;--amber:#f4b24e;
+--serif:"Literata",Georgia,serif;--display:"Instrument Serif",Georgia,serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 var(--serif)}
+.wrap{max-width:760px;margin:0 auto;padding-block:64px 96px;padding-inline:20px}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+h1{font:400 clamp(48px,9vw,86px)/.98 var(--display);margin:12px 0 18px;letter-spacing:-.01em}
+h1 em{color:var(--blue)}
+.lede{color:var(--soft);font-size:19px;max-width:60ch;margin:0 0 56px}
+h2{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
+.list{display:grid;gap:14px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;transition:border-color .15s,transform .15s}
+a.card:hover{border-color:var(--blue);transform:translateY(-2px)}
+a.card:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.card h3{font:400 32px/1.1 var(--display);margin:0 0 8px}
+.card p{margin:0;color:var(--soft);font-size:15.5px}
+.tags{font:12px/1 var(--mono);color:var(--muted);margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.tags span{border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.soon{border:1px dashed var(--line);border-radius:16px;padding:18px 24px;color:var(--muted);font:14px/1.6 var(--mono)}
+footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--line);font:13px/1.6 var(--mono);color:var(--muted)}
+@media (prefers-reduced-motion:reduce){a.card{transition:none}a.card:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="kicker">Reliability engineering</span>
+  <h1>Reliability, <em>visually</em></h1>
+  <p class="lede">Interactive explainers for the ideas behind MTBF, Weibull plots and life-data analysis. Every graph is live: drag it, slide it, break it, and build the intuition the formulas leave out.</p>
+
+  <h2>Articles</h2>
+  <div class="list">
+    <a class="card" href="mle/">
+      <h3>The likeliest curve</h3>
+      <p>What Maximum Likelihood Estimation really does, why suspensions matter, and when MLE beats a straight line on Weibull paper.</p>
+      <div class="tags"><span>MLE</span><span>Weibull</span><span>Censoring</span><span>Rank regression</span></div>
+    </a>
+    <div class="soon">Coming next: Weibull vs lognormal · What β really tells you · Confidence bounds, visually</div>
+  </div>
+
+  <footer>© Laxman · Written for reliability engineers who like to see the math move.</footer>
+</div>
+</body>
+</html>

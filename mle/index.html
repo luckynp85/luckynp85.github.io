@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An interactive, visual explainer of Maximum Likelihood Estimation and rank regression for reliability data.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Likeliest Curve: MLE for reliability, visually">
+<meta property="og:description" content="Drag, slide and climb your way to understanding Maximum Likelihood Estimation, suspensions and Weibull fits.">
+<meta property="og:image" content="https://luckynp85.github.io/mle/preview.png">
+<meta property="og:url" content="https://luckynp85.github.io/mle/">
+<meta name="twitter:card" content="summary_large_image">
+<title>The Likeliest Curve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.home{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:inline-block;margin-bottom:28px}
+.home:hover{color:var(--ink)}
+
+:root{
+  color-scheme:dark;
+  --bg:#0f141b; --panel:#151c26; --panel2:#1c2533; --ink:#e8ebf0; --soft:#c3cad5; --muted:#8e9aab; --line:#253245;
+  --blue:#5fb0f5; --amber:#f4b24e; --rose:#f0788a; --teal:#58d3b0; --violet:#b69cf5;
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  --display:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font:17px/1.72 var(--serif);overflow-x:clip;-webkit-font-smoothing:antialiased}
+.wrap{max-width:700px;margin:0 auto;padding-block:40px 110px;padding-inline:20px}
+h1,h2{font-family:var(--display);font-weight:400;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(46px,9vw,84px);line-height:.98;margin:10px 0 18px}
+h1 em{color:var(--blue)}
+h2{font-size:clamp(32px,5.4vw,44px);line-height:1.08;margin:84px 0 14px}
+h3{font:600 15px/1.4 var(--serif);margin:28px 0 6px;color:var(--soft)}
+p{margin:0 0 18px;color:var(--soft)}
+p strong,li strong{color:var(--ink);font-weight:600}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.lede{font-size:20px;line-height:1.6;color:var(--ink)}
+.chap{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:84px;display:block}
+.chap + h2{margin-top:10px}
+.b{color:var(--blue)} .a{color:var(--amber)} .r{color:var(--rose)} .t{color:var(--teal)} .v{color:var(--violet)}
+.mono{font-family:var(--mono);font-size:.88em}
+.eq{font-family:var(--display);font-size:clamp(22px,4vw,30px);text-align:center;margin:26px 0;color:var(--ink);line-height:1.4;overflow-x:auto}
+.eq i{font-style:italic}
+.eq small{display:block;font:13px/1.5 var(--mono);color:var(--muted);margin-top:6px}
+.fig{position:relative;left:50%;transform:translateX(-50%);width:min(940px,calc(100vw - 40px));margin-block:30px 34px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px}
+.fig canvas{display:block;width:100%;touch-action:none}
+.figcap{font:13px/1.55 var(--mono);color:var(--muted);margin:12px 2px 0}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:4px 2px 12px}
+.controls label{font:12px/1 var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+input[type=range]{accent-color:var(--blue);width:min(340px,100%);flex:1 1 200px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+button{font:500 13px/1 var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+button:hover{border-color:#3a4c66}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button[aria-pressed=true]{background:#20364f;border-color:var(--blue);color:#fff}
+button.go{background:transparent;border-color:var(--amber);color:var(--amber)}
+.read{display:flex;flex-wrap:wrap;gap:8px 26px;font:13px/1.5 var(--mono);color:var(--muted);margin:10px 2px 0}
+.read b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.note{border-left:2px solid var(--amber);padding:2px 0 2px 16px;margin:24px 0;color:var(--ink);font-style:italic}
+table{border-collapse:collapse;width:100%;font:13.5px/1.5 var(--mono);font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:12px;letter-spacing:.04em}
+td{color:var(--soft)}
+.tbl{overflow-x:auto}
+.sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:8px}
+.guide{font-family:var(--serif);font-size:15px}
+.guide td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+ul{padding-left:20px;color:var(--soft)} li{margin-bottom:8px}
+.end{margin-top:70px;padding-top:26px;border-top:1px solid var(--line);font:13px/1.6 var(--mono);color:var(--muted)}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<a class="home" href="../">← Reliability, visually</a>
+
+<span class="kicker">Reliability, visually</span>
+<h1>The <em>likeliest</em> curve</h1>
+<p class="lede">You put ten power supplies on a test bench and write down when each one dies. Now someone asks: "So what's the MTBF?" Behind that simple question hides one of the most beautiful ideas in statistics. Let's find it by playing.</p>
+
+<div class="fig">
+  <canvas id="hero" aria-label="Animated exponential curves sweeping over ten failure times, with a meter showing how well each curve explains the data"></canvas>
+  <p class="figcap">Ten amber dots = ten failure times. The blue curve is a guess at the "true" failure distribution. Some guesses explain the dots well; most don't. Watch the meter.</p>
+</div>
+
+<p>Here is the whole idea in one sentence, before any math: <strong>of all the curves that could have produced your data, pick the one under which your data looks least surprising.</strong> That's Maximum Likelihood Estimation. Everything else is just making that sentence precise.</p>
+
+<span class="chap">Part one</span>
+<h2>A curve that "explains" data</h2>
+
+<p>Our ten power supplies failed at these times (hours):</p>
+<p class="mono a" style="text-align:center">410 · 620 · 780 · 890 · 1050 · 1210 · 1480 · 1760 · 2870 · 4520</p>
+
+<p>Electronics like these often fail at random, with a constant hazard rate, so a natural model is the <strong>exponential distribution</strong>. It has just one knob: the mean life <span class="b">θ</span> (the MTBF). Its probability density is</p>
+
+<div class="eq"><i>f</i>(<i>t</i>) = <span class="b">(1/θ)</span> · e<sup>−<i>t</i>/<span class="b">θ</span></sup><small>height of the curve at time t = how "expected" a failure at t is</small></div>
+
+<p>Now picture each failure as a pin stuck in the time axis. For any guess of <span class="b">θ</span>, look straight up from each pin to the curve. That <span class="a">height</span> measures how plausible that failure is under your guess. A good guess puts the curve <em>high</em> where the pins are.</p>
+
+<div class="fig">
+  <div class="controls">
+    <label for="th2">Guess θ</label>
+    <input id="th2" type="range" min="300" max="5000" step="10" value="700">
+    <span class="read" style="margin:0"><span>θ = <b id="th2v">700 h</b></span></span>
+  </div>
+  <canvas id="c2a" aria-label="Exponential density with stems to each failure time"></canvas>
+  <div class="read">
+    <span>likelihood = product of the 10 heights = <b id="prod2">–</b></span>
+    <span>log-likelihood = <b id="ll2">–</b></span>
+  </div>
+  <div style="height:16px"></div>
+  <canvas id="c2b" aria-label="Log-likelihood as a function of theta, a hill with a single peak"></canvas>
+  <div class="controls" style="margin-top:12px">
+    <button class="go" id="climb2">Walk to the peak</button>
+    <span class="seg" role="group" aria-label="Sample size">
+      <button id="rep1" aria-pressed="true">10 units</button>
+      <button id="rep4" aria-pressed="false">40 units (same pattern)</button>
+    </span>
+  </div>
+  <p class="figcap">Top: the model and the data. Bottom: the "likelihood hill", each possible θ scored by how well it explains the data. The shaded band is the 95% likelihood-ratio confidence range. Switch to 40 units and watch the hill get sharper.</p>
+</div>
+
+<p>Slide θ small and the curve crams all its height near zero; the late failures (2870 h, 4520 h) get tiny stems. Slide it large and the curve flattens; <em>every</em> stem shrinks. Somewhere in between is a sweet spot. For the exponential it lands exactly on the average failure time: <strong>θ̂ = 1,559 h</strong>. The hat means "our best estimate".</p>
+
+<p class="note">The hill isn't just a way to find the peak. Its <em>shape</em> is your uncertainty. A broad, gentle hill says "lots of θ values are nearly as good." A sharp peak says "the data really pins this down." More data, sharper hill: that's where confidence bounds come from.</p>
+
+<span class="chap">Part two</span>
+<h2>Why everyone takes the log</h2>
+
+<p>Why do we <em>multiply</em> the heights? Because the failures are independent, and the probability of several independent things all happening is the product of their probabilities. But look at the readout above: the product is something like 10<sup>−33</sup>. With a thousand data points it would underflow any computer.</p>
+
+<p>The logarithm fixes this. It turns products into sums, and because log is always increasing, the peak stays at the same θ. So we climb the <strong>log-likelihood</strong> instead:</p>
+
+<div class="eq">ln <i>L</i>(<span class="b">θ</span>) = Σ ln <i>f</i>(<span class="a"><i>t<sub>i</sub></i></span> ; <span class="b">θ</span>)<small>add up the log-heights; find the θ where this sum peaks</small></div>
+
+<p>That's it. Every MLE you'll ever run (Weibull, lognormal, anything) is this recipe: write down how plausible each data point is, add up the logs, climb to the top.</p>
+
+<span class="chap">Part three</span>
+<h2>The units that didn't fail</h2>
+
+<p>Real tests rarely run until everything breaks. Say your manager stopped the test at <strong>1,500 hours</strong>. Seven supplies had failed; three were still running. Those three are <span class="r">suspensions</span> (right-censored data). What do you do with them?</p>
+
+<p>Tempting answers: ignore them, or pretend they failed at 1,500 h. Both are wrong, and the likelihood shows why. A suspended unit didn't fail at 1,500 h. It <em>survived past</em> 1,500 h. So its contribution isn't a height on the density curve; it's the probability of surviving that long, the reliability <i>R</i>(1500) = e<sup>−1500/θ</sup>.</p>
+
+<div class="eq">ln <i>L</i> = Σ<sub>failures</sub> ln <i>f</i>(<span class="a"><i>t</i></span>) + Σ<sub>suspensions</sub> ln <i>R</i>(<span class="r"><i>t</i></span>)<small>failures say "it died here"; suspensions say "it made it at least this far"</small></div>
+
+<div class="fig">
+  <div class="controls">
+    <span class="seg" role="group" aria-label="How to treat suspensions">
+      <button id="m-drop" aria-pressed="false">Ignore survivors</button>
+      <button id="m-fail" aria-pressed="false">Call them failures</button>
+      <button id="m-mle" aria-pressed="true">Use R(t), the MLE way</button>
+    </span>
+    <button class="go" id="reveal">Reveal what happened later</button>
+  </div>
+  <div class="two">
+    <canvas id="c4a" aria-label="Timeline of ten units, seven failures and three suspensions at 1500 hours"></canvas>
+    <canvas id="c4b" aria-label="Three likelihood curves for the three approaches"></canvas>
+  </div>
+  <div class="read"><span>estimated MTBF = <b id="est4">–</b></span><span id="why4"></span></div>
+  <p class="figcap">Left: each row is one unit. ✕ = failure, ▸ = still running when the test stopped. Right: the likelihood hill for each approach (each scaled to its own peak).</p>
+</div>
+
+<p>Ignoring survivors throws away the good news and says the supplies are much worse than they are (920 h). Calling them failures is less wrong but still pessimistic (1,094 h). Treating them honestly, as "at least 1,500 h", gives <strong>1,563 h</strong>. Hit <em>reveal</em>: when the test was later allowed to finish, the true sample mean was 1,559 h.</p>
+
+<p>This is the superpower of likelihood. It has a natural slot for every kind of partial information: suspensions, interval data ("failed sometime between inspections"), left-censored units. Each gets the right probability term, and the climb does the rest.</p>
+
+<span class="chap">Part four</span>
+<h2>Two knobs: climbing a real mountain</h2>
+
+<p>Exponential assumes a constant failure rate. Most mechanical and many electronic things wear out, so reliability engineers reach for the <strong>Weibull</strong>, which has two knobs: shape <span class="b">β</span> (how the failure rate changes over time) and scale <span class="b">η</span> (the characteristic life, when 63.2% have failed).</p>
+
+<p>With two knobs, the likelihood hill becomes a <em>mountain</em> on a map. Every point on the map below is one (β, η) combination, and brightness is how well it explains our seven failures plus three suspensions. <strong>Drag anywhere</strong> to try a combination, or let gradient ascent climb for you.</p>
+
+<div class="fig">
+  <div class="two">
+    <canvas id="c5a" aria-label="Log-likelihood landscape over beta and eta; drag to move the point"></canvas>
+    <canvas id="c5b" aria-label="Weibull density for the selected beta and eta with the data"></canvas>
+  </div>
+  <div class="controls" style="margin-top:14px">
+    <button class="go" id="climb5">Climb from here</button>
+    <button id="rand5">Drop me somewhere random</button>
+  </div>
+  <div class="read">
+    <span>β = <b id="b5">–</b></span><span>η = <b id="e5">–</b></span><span>ln L = <b id="ll5">–</b></span><span id="beta5"></span>
+  </div>
+  <p class="figcap">Contour lines are steps of 2 in log-likelihood. The amber diamond is the summit: the MLE. Right: the Weibull density at your point, with failures (✕) and the three suspensions (▸ at 1,500 h).</p>
+</div>
+
+<p>The summit sits near <strong>β ≈ 2.3, η ≈ 1,370 h</strong>. β above 1 means the failure rate climbs with age: wear-out. Notice the mountain's ridge is tilted: a slightly bigger β pairs with a slightly different η and fits almost as well. That tilt is the <em>correlation</em> between the two estimates, and it's why joint confidence regions are ellipses, not rectangles.</p>
+
+<p>Software doesn't literally stumble around a map. It solves "slope = 0" with Newton-Raphson or similar. But the picture is exactly right: MLE is the highest point on the likelihood landscape.</p>
+
+<span class="chap">Part five</span>
+<h2>The other way: draw a straight line</h2>
+
+<p>Before computers made climbing easy, engineers used <strong>Weibull probability paper</strong>. Its axes are warped so a Weibull distribution plots as a <em>straight line</em>. Plot each failure at an estimated fraction-failed (the <em>median rank</em>, e.g. Benard's (i − 0.3)/(n + 0.4)), then fit a line. The slope is β.</p>
+
+<p>That's <strong>rank regression</strong>, a least-squares fit, and it comes in two flavors:</p>
+<ul>
+  <li><span class="r">RRX</span>: minimize horizontal (time) distances to the line. Recommended by the <i>New Weibull Handbook</i> for small samples.</li>
+  <li><span class="t">RRY</span>: minimize vertical (probability) distances, the ordinary regression most spreadsheets do.</li>
+</ul>
+<p>Pick a dataset and compare them with <span class="b">MLE</span> on the same paper:</p>
+
+<div class="fig">
+  <div class="controls">
+    <span class="seg" role="group" aria-label="Dataset">
+      <button data-ds="A" aria-pressed="true">Power supplies</button>
+      <button data-ds="B" aria-pressed="false">Only 5 failures</button>
+      <button data-ds="C" aria-pressed="false">Heavy censoring</button>
+      <button data-ds="D" aria-pressed="false">One early oddball</button>
+      <button data-ds="E" aria-pressed="false">30 failures</button>
+    </span>
+  </div>
+  <canvas id="c6" aria-label="Weibull probability plot with MLE, RRX and RRY fit lines"></canvas>
+  <div class="tbl" style="margin-top:12px">
+    <table>
+      <thead><tr><th>Method</th><th>β (shape)</th><th>η (scale)</th><th>B10 life</th></tr></thead>
+      <tbody id="t6"></tbody>
+    </table>
+  </div>
+  <p class="figcap" id="cap6"></p>
+</div>
+
+<p>Two things jump out. First, with plenty of data every method agrees; the choice matters most when data is scarce or messy. Second, the line methods only "see" the plotted dots. Suspensions nudge the ranks but their survival times never enter the fit, which is why MLE pulls ahead when most of your units are still running.</p>
+
+<span class="chap">Part six</span>
+<h2>So which fit should you use?</h2>
+
+<div class="tbl">
+<table class="guide">
+  <thead><tr><th>Method</th><th>Idea in one line</th><th>Shines when</th><th>Watch out</th></tr></thead>
+  <tbody>
+    <tr><td><span class="sw" style="background:var(--blue)"></span>MLE</td><td>Pick the parameters that make the data least surprising.</td><td>Heavy censoring, interval data, large samples, when you need likelihood-ratio confidence bounds.</td><td>β is biased high for small samples (fewer than ~20 failures); corrections exist (e.g. RBA).</td></tr>
+    <tr><td><span class="sw" style="background:var(--rose)"></span>RRX</td><td>Straight line on probability paper, errors in time.</td><td>Small samples, mostly complete data, quick visual check of fit.</td><td>Ignores survivors' actual times; sensitive to outliers at the ends.</td></tr>
+    <tr><td><span class="sw" style="background:var(--teal)"></span>RRY</td><td>Same, errors in probability.</td><td>What a spreadsheet trendline gives you; OK as a sanity check.</td><td>Treats the ranks as the uncertain part, which is backwards for life data.</td></tr>
+    <tr><td><span class="sw" style="background:var(--muted)"></span>Moments</td><td>Match the sample mean and variance.</td><td>Hand calculations, complete data, quick first guess.</td><td>Can't handle censoring; poor for small samples.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Rules of thumb</h3>
+<ul>
+  <li><strong>Always plot the data first.</strong> A probability plot shows curvature, mixed failure modes and outliers that no single number will.</li>
+  <li><strong>Small, complete samples:</strong> start with RRX; report MLE alongside if you'll need confidence bounds.</li>
+  <li><strong>Lots of suspensions:</strong> use MLE. It's the only one here that truly uses how long survivors lasted.</li>
+  <li><strong>Methods disagree a lot?</strong> That's information. It usually means too little data, an outlier, or the wrong distribution.</li>
+</ul>
+
+<p class="note">The takeaway: a fit isn't a formula you apply; it's a question you ask. Rank regression asks "which line hugs these dots?" MLE asks "which world makes what I saw most plausible?" For reliability data, full of units that haven't failed yet, the second question is usually the better one.</p>
+
+<p class="end">Numbers on this page are computed live in your browser: exact exponential MLE, Weibull MLE by solving the score equation, Johnson's adjusted ranks with Benard's approximation for rank regression. The 30-failure set is simulated from β = 2, η = 1,000 h.</p>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const C={ink:'#e8ebf0',soft:'#c3cad5',muted:'#8e9aab',grid:'#212d3d',axis:'#3a4a60',blue:'#5fb0f5',amber:'#f4b24e',rose:'#f0788a',teal:'#58d3b0',violet:'#b69cf5',panel:'#151c26'};
+const MONO='12px "IBM Plex Mono", ui-monospace, monospace';
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function prep(cv,h){const dpr=Math.min(window.devicePixelRatio||1,2);const w=cv.clientWidth||600;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};}
+function lin(d0,d1,r0,r1){const f=v=>r0+(v-d0)/(d1-d0)*(r1-r0);f.inv=p=>d0+(p-r0)/(r1-r0)*(d1-d0);return f;}
+function lgs(d0,d1,r0,r1){const a=Math.log(d0),b=Math.log(d1);const f=v=>r0+(Math.log(v)-a)/(b-a)*(r1-r0);f.inv=p=>Math.exp(a+(p-r0)/(r1-r0)*(b-a));return f;}
+const fmt=(v,d=0)=>v.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+function text(ctx,s,x,y,col,align,base,font){ctx.fillStyle=col;ctx.font=font||MONO;ctx.textAlign=align||'left';ctx.textBaseline=base||'alphabetic';ctx.fillText(s,x,y);}
+function line(ctx,x1,y1,x2,y2,col,w,dash){ctx.strokeStyle=col;ctx.lineWidth=w||1;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);}
+function dot(ctx,x,y,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+function cross(ctx,x,y,s,col,w){line(ctx,x-s,y-s,x+s,y+s,col,w||2);line(ctx,x-s,y+s,x+s,y-s,col,w||2);}
+function tri(ctx,x,y,s,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-s*.6,y-s);ctx.lineTo(x+s,y);ctx.lineTo(x-s*.6,y+s);ctx.closePath();ctx.fill();}
+function diamond(ctx,x,y,s,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x,y-s);ctx.lineTo(x+s,y);ctx.lineTo(x,y+s);ctx.lineTo(x-s,y);ctx.closePath();ctx.fill();}
+function press(group,btn){group.forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+function sci(log10){const e=Math.floor(log10);const m=Math.pow(10,log10-e);return m.toFixed(1)+' × 10<sup>'+(e<0?'−'+(-e):e)+'</sup>';}
+
+/* ---------- data ---------- */
+const FULL=[410,620,780,890,1050,1210,1480,1760,2870,4520];
+const SUMF=FULL.reduce((a,b)=>a+b,0), MEAN=SUMF/FULL.length;
+const expPdf=(t,th)=>Math.exp(-t/th)/th;
+const expLL=(th,r,T)=>-r*Math.log(th)-T/th;
+const FAILS=[410,620,780,890,1050,1210,1480], SUSP=[1500,1500,1500];
+
+/* ---------- time axis helper ---------- */
+function timeAxis(ctx,x,y0,x0,x1,max,step){line(ctx,x0,y0,x1,y0,C.axis,1);for(let t=0;t<=max;t+=step){const px=x(t);line(ctx,px,y0,px,y0+4,C.axis,1);text(ctx,t===0?'0':fmt(t),px,y0+17,C.muted,'center');}}
+
+/* ---------- hero ---------- */
+let heroT=0, heroOn=true;
+function drawHero(th){
+  const cv=$('#hero');const {ctx,w,h}=prep(cv,230);
+  const L=14,R=14,T=16,B=30;
+  const x=lin(0,5000,L,w-R), y=lin(0,0.0032,h-B,T);
+  timeAxis(ctx,x,h-B,L,w-R,5000,1000);
+  text(ctx,'hours',w-R,h-B-8,C.muted,'right');
+  ctx.save();ctx.beginPath();ctx.rect(L,T,w-L-R,h-B-T);ctx.clip();
+  ctx.beginPath();ctx.moveTo(x(0),y(0));for(let t=0;t<=5000;t+=20)ctx.lineTo(x(t),y(expPdf(t,th)));ctx.lineTo(x(5000),y(0));ctx.closePath();ctx.fillStyle='rgba(95,176,245,.12)';ctx.fill();
+  ctx.beginPath();for(let t=0;t<=5000;t+=20){const p=[x(t),y(expPdf(t,th))];t?ctx.lineTo(...p):ctx.moveTo(...p);}ctx.strokeStyle=C.blue;ctx.lineWidth=2.5;ctx.stroke();
+  ctx.restore();
+  FULL.forEach(t=>{const px=x(t),py=y(Math.min(expPdf(t,th),0.0032));line(ctx,px,h-B,px,py,C.amber,2);dot(ctx,px,py,3.5,C.amber);dot(ctx,px,h-B,3,C.amber);});
+  const rel=Math.exp(expLL(th,10,SUMF)-expLL(MEAN,10,SUMF));
+  const mw=Math.min(170,w*.35), mx=w-R-mw, my=T+6;
+  text(ctx,'θ = '+fmt(th)+' h',mx,my+4,C.blue,'left','middle');
+  ctx.fillStyle='#223044';ctx.fillRect(mx,my+16,mw,8);ctx.fillStyle=rel>.9?C.amber:'#b98a3f';ctx.fillRect(mx,my+16,mw*rel,8);
+  text(ctx,'likelihood: '+Math.round(rel*100)+'% of best',mx,my+40,rel>.9?C.amber:C.muted,'left','middle');
+}
+function heroLoop(ts){if(heroOn){const th=Math.exp(Math.log(1500)+1.05*Math.sin(ts*0.00045));drawHero(th);}requestAnimationFrame(heroLoop);}
+
+/* ---------- part 1: exponential ---------- */
+const s2={th:700,rep:1};
+function interval(rep){let lo=null,hi=null;for(let th=300;th<=5000;th+=2){const r=rep*(expLL(th,10,SUMF)-expLL(MEAN,10,SUMF));if(r>=-1.92){if(lo===null)lo=th;hi=th;}}return [lo,hi];}
+function draw2(){
+  const th=s2.th, rep=s2.rep;
+  {const {ctx,w,h}=prep($('#c2a'),250);const L=14,R=14,T=12,B=30;
+   const x=lin(0,5000,L,w-R), y=lin(0,0.0032,h-B,T);
+   for(let t=1000;t<=5000;t+=1000)line(ctx,x(t),T,x(t),h-B,C.grid,1);
+   timeAxis(ctx,x,h-B,L,w-R,5000,1000);text(ctx,'failure time (h)',w-R,h-B-8,C.muted,'right');
+   ctx.save();ctx.beginPath();ctx.rect(L,T,w-L-R,h-B-T);ctx.clip();
+   ctx.beginPath();ctx.moveTo(x(0),y(0));for(let t=0;t<=5000;t+=20)ctx.lineTo(x(t),y(expPdf(t,th)));ctx.lineTo(x(5000),y(0));ctx.closePath();ctx.fillStyle='rgba(95,176,245,.12)';ctx.fill();
+   ctx.beginPath();for(let t=0;t<=5000;t+=20){const p=[x(t),y(expPdf(t,th))];t?ctx.lineTo(...p):ctx.moveTo(...p);}ctx.strokeStyle=C.blue;ctx.lineWidth=2.5;ctx.stroke();ctx.restore();
+   FULL.forEach(t=>{const px=x(t),py=y(Math.min(expPdf(t,th),0.0032));line(ctx,px,h-B,px,py,C.amber,2);dot(ctx,px,py,4,C.amber);dot(ctx,px,h-B,3,C.amber);});
+   text(ctx,'f(t) with θ = '+fmt(th)+' h',L+4,T+12,C.blue);
+  }
+  {const {ctx,w,h}=prep($('#c2b'),220);const L=44,R=14,T=14,B=30;
+   const x=lin(300,5000,L,w-R), y=lin(-12,0.6,h-B,T);
+   const [lo,hi]=interval(rep);
+   ctx.fillStyle='rgba(244,178,78,.10)';ctx.fillRect(x(lo),T,x(hi)-x(lo),h-B-T);
+   text(ctx,'95% range '+fmt(lo)+'–'+fmt(hi)+' h',x(lo)+6,h-B-8,C.amber);
+   [-12,-8,-4,0].forEach(v=>{line(ctx,L,y(v),w-R,y(v),C.grid,1);text(ctx,String(v).replace('-','−'),L-8,y(v),C.muted,'right','middle');});
+   line(ctx,L,y(-1.92),w-R,y(-1.92),C.amber,1,[4,4]);
+   line(ctx,L,h-B,w-R,h-B,C.axis,1);
+   for(let t=1000;t<=5000;t+=1000){line(ctx,x(t),h-B,x(t),h-B+4,C.axis,1);text(ctx,fmt(t),x(t),h-B+17,C.muted,'center');}
+   text(ctx,'θ (h)',w-R,h-B-8,C.muted,'right');
+   ctx.save();ctx.translate(12,(T+h-B)/2);ctx.rotate(-Math.PI/2);text(ctx,'ln L − max',0,0,C.muted,'center','middle');ctx.restore();
+   ctx.save();ctx.beginPath();ctx.rect(L,T,w-L-R,h-B-T);ctx.clip();
+   ctx.beginPath();for(let t=300;t<=5000;t+=10){const v=rep*(expLL(t,10,SUMF)-expLL(MEAN,10,SUMF));const p=[x(t),y(v)];t===300?ctx.moveTo(...p):ctx.lineTo(...p);}ctx.strokeStyle=C.blue;ctx.lineWidth=2.5;ctx.stroke();ctx.restore();
+   diamond(ctx,x(MEAN),y(0),6,C.amber);text(ctx,'peak θ̂ = '+fmt(MEAN)+' h',x(MEAN)+10,y(0)+4,C.amber);
+   const cv=rep*(expLL(th,10,SUMF)-expLL(MEAN,10,SUMF));const cy=y(Math.max(cv,-12));
+   line(ctx,x(th),T,x(th),h-B,'rgba(232,235,240,.35)',1);dot(ctx,x(th),cy,6,C.ink);dot(ctx,x(th),cy,3,C.blue);
+  }
+  $('#th2v').textContent=fmt(th)+' h';
+  const ll=rep*expLL(th,10,SUMF);
+  $('#prod2').innerHTML=sci(ll/Math.LN10);
+  $('#ll2').textContent=fmt(ll,1).replace('-','−');
+}
+$('#th2').addEventListener('input',e=>{s2.th=+e.target.value;draw2();});
+const repBtns=[$('#rep1'),$('#rep4')];
+$('#rep1').onclick=()=>{s2.rep=1;press(repBtns,$('#rep1'));draw2();};
+$('#rep4').onclick=()=>{s2.rep=4;press(repBtns,$('#rep4'));draw2();};
+function tween(from,to,ms,cb){if(reduce){cb(to);return;}const t0=performance.now();function step(n){const k=Math.min(1,(n-t0)/ms);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;cb(from+(to-from)*e);if(k<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+$('#climb2').onclick=()=>tween(s2.th,MEAN,1100,v=>{s2.th=Math.round(v);$('#th2').value=s2.th;draw2();});
+
+/* ---------- part 3: censoring ---------- */
+const S4=6440, TT=10940;
+const M4={drop:{r:7,T:S4,col:C.rose,est:S4/7,why:'the 3 survivors vanished, so only the early failures count'},
+          fail:{r:10,T:TT,col:C.violet,est:TT/10,why:'survivors are counted as dying at 1,500 h, which they didn’t'},
+          mle:{r:7,T:TT,col:C.blue,est:TT/7,why:'total time on test ÷ number of failures: every hour survived counts'}};
+const s4={m:'mle',reveal:false};
+const LATER=[1760,2870,4520];
+function draw4(){
+  {const {ctx,w,h}=prep($('#c4a'),270);const L=10,R=14,T=12,B=30;
+   const x=lin(0,5000,L,w-R);const rowH=(h-B-T)/10;
+   const units=FAILS.map(t=>({t,f:1})).concat(SUSP.map((t,i)=>({t,f:0,later:LATER[i]})));
+   line(ctx,x(1500),T-4,x(1500),h-B,'rgba(240,120,138,.5)',1,[4,4]);text(ctx,'test stopped',x(1500)+5,T+6,C.rose);
+   units.forEach((u,i)=>{const yy=T+rowH*(i+.5);
+     if(!u.f&&s4.reveal){line(ctx,x(1500),yy,x(u.later),yy,'rgba(232,235,240,.28)',3,[3,4]);cross(ctx,x(u.later),yy,4,'rgba(232,235,240,.55)',1.5);}
+     const drop=!u.f&&s4.m==='drop';
+     line(ctx,x(0),yy,x(u.t),yy,drop?'rgba(142,154,171,.22)':(u.f?'rgba(244,178,78,.55)':'rgba(240,120,138,.6)'),4);
+     if(u.f)cross(ctx,x(u.t),yy,5,C.amber,2.2);
+     else if(s4.m==='fail')cross(ctx,x(u.t),yy,5,C.violet,2.2);
+     else if(!drop)tri(ctx,x(u.t)+4,yy,6,C.rose);
+   });
+   if(s4.reveal){line(ctx,x(MEAN),T-4,x(MEAN),h-B,'rgba(232,235,240,.6)',1,[2,3]);text(ctx,'true mean 1,559',x(MEAN)+5,h-B-6,C.ink);}
+   timeAxis(ctx,x,h-B,L,w-R,5000,1000);
+  }
+  {const {ctx,w,h}=prep($('#c4b'),270);const L=14,R=14,T=12,B=30;
+   const x=lin(300,3500,L,w-R), y=lin(0,1.08,h-B,T);
+   line(ctx,L,h-B,w-R,h-B,C.axis,1);
+   for(let t=500;t<=3500;t+=500){line(ctx,x(t),h-B,x(t),h-B+4,C.axis,1);if(t%1000===0||w>420)text(ctx,fmt(t),x(t),h-B+17,C.muted,'center');}
+   text(ctx,'MTBF θ (h)',w-R,h-B-8,C.muted,'right');
+   ['drop','fail','mle'].forEach(k=>{const m=M4[k];const sel=k===s4.m;const mx=expLL(m.est,m.r,m.T);
+     ctx.beginPath();for(let t=300;t<=3500;t+=8){const v=Math.exp(expLL(t,m.r,m.T)-mx);const p=[x(t),y(v)];t===300?ctx.moveTo(...p):ctx.lineTo(...p);}
+     ctx.globalAlpha=sel?1:.3;ctx.strokeStyle=m.col;ctx.lineWidth=sel?3:1.5;ctx.stroke();
+     diamond(ctx,x(m.est),y(1),sel?6:4,m.col);
+     if(sel)text(ctx,fmt(m.est)+' h',x(m.est),y(1)-12,m.col,'center');
+     ctx.globalAlpha=1;});
+   if(s4.reveal){line(ctx,x(MEAN),T,x(MEAN),h-B,'rgba(232,235,240,.6)',1,[2,3]);}
+  }
+  const m=M4[s4.m];$('#est4').textContent=fmt(m.est)+' h';$('#why4').textContent=m.why;$('#est4').style.color=m.col;
+}
+const mBtns=[$('#m-drop'),$('#m-fail'),$('#m-mle')];
+[['drop','#m-drop'],['fail','#m-fail'],['mle','#m-mle']].forEach(([k,id])=>{$(id).onclick=()=>{s4.m=k;press(mBtns,$(id));draw4();};});
+$('#reveal').onclick=()=>{s4.reveal=!s4.reveal;$('#reveal').textContent=s4.reveal?'Hide what happened later':'Reveal what happened later';draw4();};
+
+/* ---------- Weibull core ---------- */
+function wLL(b,e,f,s){let v=0;const lb=Math.log(b),le=Math.log(e);for(const t of f)v+=lb-b*le+(b-1)*Math.log(t)-Math.pow(t/e,b);for(const t of s)v-=Math.pow(t/e,b);return v;}
+function wMLE(f,s){const all=f.concat(s);const tm=Math.max(...all);const r=f.length;const mlf=f.reduce((a,t)=>a+Math.log(t/tm),0)/r;
+  const g=b=>{let A=0,S=0;for(const t of all){const x=t/tm,p=Math.pow(x,b);A+=p*Math.log(x);S+=p;}return A/S-1/b-mlf;};
+  let lo=0.02,hi=40;for(let i=0;i<120;i++){const m=(lo+hi)/2;if(g(m)>0)hi=m;else lo=m;}
+  const b=(lo+hi)/2;let S=0;for(const t of all)S+=Math.pow(t/tm,b);return {b,e:tm*Math.pow(S/r,1/b)};}
+const wPdf=(t,b,e)=>t<=0?(b<1?Infinity:(b===1?1/e:0)):(b/e)*Math.pow(t/e,b-1)*Math.exp(-Math.pow(t/e,b));
+
+/* ---------- part 4: landscape ---------- */
+const BR=[0.5,4.5], ER=[500,4000];
+const W5=wMLE(FAILS,SUSP), LLMAX=wLL(W5.b,W5.e,FAILS,SUSP);
+const s5={b:0.9,e:3000,trail:[],anim:false};
+let heat=null, heatKey='';
+function stops(v){const S=[[0,[18,26,37]],[.45,[27,64,102]],[.75,[55,132,200]],[.92,[150,205,250]],[1,[255,240,205]]];for(let i=1;i<S.length;i++){if(v<=S[i][0]){const [a,ca]=S[i-1],[b2,cb]=S[i];const k=(v-a)/(b2-a);return ca.map((c,j)=>c+(cb[j]-c)*k);}}return S[S.length-1][1];}
+function buildHeat(pw,ph){const key=pw+'x'+ph;if(heatKey===key)return heat;const oc=document.createElement('canvas');oc.width=pw;oc.height=ph;const c=oc.getContext('2d');const img=c.createImageData(pw,ph);
+  const rel=new Float32Array(pw*ph);const xb=lin(0,pw-1,BR[0],BR[1]);const ye=lgs(ER[1],ER[0],0,ph-1);
+  for(let j=0;j<ph;j++){const e=ye.inv(j);for(let i=0;i<pw;i++){rel[j*pw+i]=wLL(xb(i),e,FAILS,SUSP)-LLMAX;}}
+  const band=v=>v<-40?-99:Math.floor(v/2);
+  for(let j=0;j<ph;j++)for(let i=0;i<pw;i++){const v=rel[j*pw+i];let col=stops(Math.max(0,1+v/40));
+    const bd=band(v);const edge=(i<pw-1&&band(rel[j*pw+i+1])!==bd)||(j<ph-1&&band(rel[(j+1)*pw+i])!==bd);
+    if(edge&&v>-40)col=col.map(c=>c+(255-c)*.28);
+    const k=(j*pw+i)*4;img.data[k]=col[0];img.data[k+1]=col[1];img.data[k+2]=col[2];img.data[k+3]=255;}
+  c.putImageData(img,0,0);heat=oc;heatKey=key;return oc;}
+let map5=null;
+function draw5(){
+  {const cv=$('#c5a');const {ctx,w,h}=prep(cv,320);const L=62,R=12,T=10,B=34;
+   const pw=Math.max(40,Math.round(w-L-R)), ph=Math.round(h-T-B);
+   ctx.imageSmoothingEnabled=true;ctx.drawImage(buildHeat(pw,ph),L,T,pw,ph);
+   const x=lin(BR[0],BR[1],L,L+pw), y=lgs(ER[0],ER[1],T+ph,T);map5={x,y,L,T,pw,ph};
+   for(let b=1;b<=4;b++){line(ctx,x(b),T+ph,x(b),T+ph+4,C.axis,1);text(ctx,String(b),x(b),T+ph+17,C.muted,'center');}
+   text(ctx,'β  shape →',L+pw,T+ph+30,C.muted,'right');
+   [500,1000,2000,4000].forEach(e=>{line(ctx,L-4,y(e),L,y(e),C.axis,1);text(ctx,fmt(e),L-7,y(e),C.muted,'right','middle');});
+   ctx.save();ctx.translate(11,T+ph/2);ctx.rotate(-Math.PI/2);text(ctx,'η  scale (h) →',0,0,C.muted,'center','middle');ctx.restore();
+   line(ctx,x(1),T,x(1),T+ph,'rgba(232,235,240,.18)',1,[3,4]);text(ctx,'β = 1 (random)',x(1)+4,T+12,'rgba(232,235,240,.5)');
+   if(s5.trail.length>1){ctx.beginPath();s5.trail.forEach((p,i)=>{const q=[x(p.b),y(p.e)];i?ctx.lineTo(...q):ctx.moveTo(...q);});ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.setLineDash([2,3]);ctx.stroke();ctx.setLineDash([]);}
+   diamond(ctx,x(W5.b),y(W5.e),7,C.amber);
+   const px=x(s5.b),py=y(s5.e);ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,8,0,7);ctx.stroke();dot(ctx,px,py,3,C.ink);
+  }
+  {const {ctx,w,h}=prep($('#c5b'),320);const L=14,R=26,T=12,B=34;
+   const x=lin(0,4000,L,w-R), ymax=0.0016, y=lin(0,ymax,h-B,T);
+   timeAxis(ctx,x,h-B,L,w-R,4000,1000);text(ctx,'hours',w-R,h-B-8,C.muted,'right');
+   ctx.save();ctx.beginPath();ctx.rect(L,T,w-L-R,h-B-T);ctx.clip();
+   const path=(b,e)=>{ctx.beginPath();for(let t=2;t<=4000;t+=10){const p=[x(t),y(Math.min(wPdf(t,b,e),ymax*2))];t===2?ctx.moveTo(...p):ctx.lineTo(...p);}};
+   path(W5.b,W5.e);ctx.strokeStyle='rgba(244,178,78,.45)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+   path(s5.b,s5.e);ctx.lineTo(x(4000),y(0));ctx.lineTo(x(2),y(0));ctx.closePath();ctx.fillStyle='rgba(95,176,245,.12)';ctx.fill();
+   path(s5.b,s5.e);ctx.strokeStyle=C.blue;ctx.lineWidth=2.5;ctx.stroke();ctx.restore();
+   FAILS.forEach(t=>cross(ctx,x(t),h-B-9,4.5,C.amber,2));
+   SUSP.forEach((t,i)=>tri(ctx,x(t)+4,h-B-24-i*12,5.5,C.rose));
+   text(ctx,'your curve',L+4,T+12,C.blue);text(ctx,'MLE (dashed)',L+4,T+28,C.amber);
+  }
+  $('#b5').textContent=s5.b.toFixed(2);$('#e5').textContent=fmt(s5.e)+' h';
+  const ll=wLL(s5.b,s5.e,FAILS,SUSP);$('#ll5').textContent=fmt(ll,1).replace('-','−')+'  ('+(ll-LLMAX<=-0.05?fmt(ll-LLMAX,1).replace('-','−'):'at the summit')+')';
+  $('#beta5').textContent=s5.b<0.95?'β < 1: failure rate falls with age (infant mortality)':s5.b<=1.05?'β ≈ 1: constant failure rate (random)':'β > 1: failure rate rises with age (wear-out)';
+}
+function setFromPointer(ev){if(!map5)return;const r=$('#c5a').getBoundingClientRect();const px=ev.clientX-r.left,py=ev.clientY-r.top;
+  const {x,y,L,T,pw,ph}=map5;const cx=Math.max(L,Math.min(L+pw,px)),cy=Math.max(T,Math.min(T+ph,py));s5.b=x.inv(cx);s5.e=y.inv(cy);s5.trail=[];draw5();}
+let drag=false;const c5=$('#c5a');
+c5.addEventListener('pointerdown',e=>{drag=true;s5.anim=false;c5.setPointerCapture(e.pointerId);setFromPointer(e);});
+c5.addEventListener('pointermove',e=>{if(drag)setFromPointer(e);});
+c5.addEventListener('pointerup',()=>drag=false);c5.addEventListener('pointercancel',()=>drag=false);
+function climbPath(b0,e0){const lnE0=Math.log(ER[0]),span=Math.log(ER[1])-lnE0,bs=BR[1]-BR[0];
+  const toP=(a,c)=>({b:BR[0]+a*bs,e:Math.exp(lnE0+c*span)});const f=(a,c)=>{const p=toP(a,c);return p.b<=0.05?-1e9:wLL(p.b,p.e,FAILS,SUSP);};
+  let a=(b0-BR[0])/bs,c=(Math.log(e0)-lnE0)/span,s=0.012;const out=[toP(a,c)];let cur=f(a,c);
+  for(let it=0;it<4000&&s>2e-4;it++){const hh=1e-4;const ga=(f(a+hh,c)-f(a-hh,c))/(2*hh),gc=(f(a,c+hh)-f(a,c-hh))/(2*hh);const n=Math.hypot(ga,gc)||1;
+    const na=a+s*ga/n,nc=c+s*gc/n,nv=f(na,nc);if(nv>cur){a=na;c=nc;cur=nv;out.push(toP(a,c));}else s*=0.5;}
+  out.push({b:W5.b,e:W5.e});return out;}
+$('#climb5').onclick=()=>{const path=climbPath(s5.b,s5.e);if(reduce){s5.b=W5.b;s5.e=W5.e;s5.trail=path;draw5();return;}
+  s5.anim=true;s5.trail=[path[0]];let i=0;const per=Math.max(1,Math.ceil(path.length/70));
+  (function step(){if(!s5.anim)return;i=Math.min(path.length-1,i+per);s5.trail=path.slice(0,i+1);s5.b=path[i].b;s5.e=path[i].e;draw5();if(i<path.length-1)requestAnimationFrame(step);else s5.anim=false;})();};
+$('#rand5').onclick=()=>{s5.anim=false;s5.b=0.6+Math.random()*3.7;s5.e=Math.exp(Math.log(560)+Math.random()*(Math.log(3800)-Math.log(560)));s5.trail=[];draw5();};
+
+/* ---------- part 5: probability plot ---------- */
+function rng(s){return()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;}}
+const rr7=rng(7);const BIG=Array.from({length:30},()=>Math.max(5,Math.round(1000*Math.pow(-Math.log(1-rr7()),1/2)))).sort((a,b)=>a-b);
+const DS={
+ A:{f:FAILS,s:SUSP,cap:'Seven failures, three survivors. All three methods land close together: β a bit above 2 (wear-out), η around 1,370 h.'},
+ B:{f:[180,420,610,950,1300],s:[],cap:'Only five failures. MLE gives a noticeably steeper β than the lines. That’s the known small-sample bias of MLE (β tends to come out too high), which is why rank regression (RRX) is the usual pick for small, complete samples.'},
+ C:{f:[310,780,1150],s:[400,500,600,700,800,900,1000,1100,1200,1300,1400,1500],cap:'Fifteen units, only three failures. The lines have just three dots to go on. MLE also uses the twelve survivors’ running hours, which is why it’s preferred when most units haven’t failed. With this little data, expect wide confidence bounds whatever you choose.'},
+ D:{f:[25,640,720,810,890,960,1040,1130],s:[],cap:'One unit died at 25 h; the rest cluster near 900 h. On log paper that lone point acts like a lever: RRY collapses to β ≈ 0.7 and "infant mortality"; RRX to ≈ 1.1; MLE still says ≈ 2. When fits disagree this much, investigate the oddball: it’s often a different failure mode (a DOA, an assembly defect) that deserves its own analysis.'},
+ E:{f:BIG,s:[],cap:'Thirty failures simulated from β = 2, η = 1,000 h. With enough data, every method converges on the truth. Method choice is mostly a small-data problem.'}
+};
+function ranks(f,s){const it=f.map(t=>({t,f:1})).concat(s.map(t=>({t,f:0})));it.sort((a,b)=>a.t-b.t||b.f-a.f);const n=it.length;let p=0;const o=[];it.forEach((x,i)=>{const rev=n-i;if(x.f){p+=(n+1-p)/(1+rev);o.push({t:x.t,F:(p-0.3)/(n+0.4)});}});return o;}
+function rreg(pts){const X=pts.map(p=>Math.log(p.t)),Y=pts.map(p=>Math.log(-Math.log(1-p.F)));const n=X.length;const mx=X.reduce((a,b)=>a+b)/n,my=Y.reduce((a,b)=>a+b)/n;let sxy=0,sxx=0,syy=0;for(let i=0;i<n;i++){sxy+=(X[i]-mx)*(Y[i]-my);sxx+=(X[i]-mx)**2;syy+=(Y[i]-my)**2;}
+  const d=sxy/sxx,c=my-d*mx,bb=sxy/syy,a=mx-bb*my;return {rrx:{b:1/bb,e:Math.exp(a)},rry:{b:d,e:Math.exp(-c/d)}};}
+const b10=o=>o.e*Math.pow(-Math.log(0.9),1/o.b);
+let ds6='A';
+function draw6(){
+  const d=DS[ds6];const pts=ranks(d.f,d.s);const mle=wMLE(d.f,d.s);const {rrx,rry}=rreg(pts);
+  const {ctx,w,h}=prep($('#c6'),360);const L=62,R=28,T=12,B=34;
+  const all=d.f.concat(d.s);const tmin=Math.pow(10,Math.floor(Math.log10(Math.min(...d.f))-0.15)), tmax=Math.pow(10,Math.ceil(Math.log10(Math.max(...all)*2.5)));
+  const x=lgs(tmin,tmax,L,w-R);const Y=F=>Math.log(-Math.log(1-F));const y=lin(Y(0.01),Y(0.995),h-B,T);
+  [0.01,0.02,0.05,0.1,0.2,0.3,0.5,0.632,0.8,0.9,0.99].forEach(F=>{const py=y(Y(F));line(ctx,L,py,w-R,py,F===0.632?'rgba(232,235,240,.22)':C.grid,1,F===0.632?[4,4]:null);text(ctx,(F*100).toFixed(F===0.632?1:0)+'%',L-6,py,F===0.632?C.soft:C.muted,'right','middle');});
+  for(let k=Math.log10(tmin);k<=Math.log10(tmax)+1e-9;k++){[1,2,5].forEach(m=>{const t=m*Math.pow(10,k);if(t<tmin-1e-9||t>tmax+1e-9)return;const px=x(t);line(ctx,px,T,px,h-B,m===1?'#2a384b':C.grid,1);if(m===1||w>480)text(ctx,fmt(t),px,h-B+17,C.muted,'center');});}
+  line(ctx,L,h-B,w-R,h-B,C.axis,1);
+  text(ctx,'time (h, log scale)',w-R-4,h-B-8,C.muted,'right');
+  ctx.save();ctx.translate(11,(T+h-B)/2);ctx.rotate(-Math.PI/2);text(ctx,'unreliability F(t)',0,0,C.muted,'center','middle');ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(L,T,w-L-R,h-B-T);ctx.clip();
+  [[rry,C.teal,2],[rrx,C.rose,2],[mle,C.blue,2.8]].forEach(([o,col,lw])=>{const yl=t=>o.b*(Math.log(t)-Math.log(o.e));line(ctx,x(tmin),y(yl(tmin)),x(tmax),y(yl(tmax)),col,lw);});
+  ctx.restore();
+  pts.forEach(p=>{const px=x(p.t),py=y(Y(p.F));dot(ctx,px,py,5,C.panel);dot(ctx,px,py,4,C.amber);});
+  if(d.s.length)text(ctx,d.s.length+' suspension'+(d.s.length>1?'s':'')+' (not plotted; they shift the ranks)',L+8,T+14,C.rose);
+  text(ctx,'63.2% → η',w-R-4,y(Y(0.632))-6,C.soft,'right');
+  const row=(name,col,o)=>'<tr><td><span class="sw" style="background:'+col+'"></span>'+name+'</td><td>'+o.b.toFixed(2)+'</td><td>'+fmt(o.e)+' h</td><td>'+fmt(b10(o))+' h</td></tr>';
+  $('#t6').innerHTML=row('MLE','var(--blue)',mle)+row('RRX (rank regr. on X)','var(--rose)',rrx)+row('RRY (rank regr. on Y)','var(--teal)',rry);
+  $('#cap6').textContent=d.cap;
+}
+const dsBtns=[...document.querySelectorAll('[data-ds]')];
+dsBtns.forEach(b=>b.onclick=()=>{ds6=b.dataset.ds;press(dsBtns,b);draw6();});
+
+/* ---------- boot ---------- */
+function all(){draw2();draw4();draw5();draw6();if(reduce||!heroOn)drawHero(900);}
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(all,120);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(all);
+all();
+if(!reduce){const io=new IntersectionObserver(es=>{heroOn=es[0].isIntersecting;});io.observe($('#hero'));requestAnimationFrame(heroLoop);}else drawHero(900);
+})();
+</script>
+
+</body>
+</html>
